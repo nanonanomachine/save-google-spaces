@@ -27,10 +27,16 @@ Usage
 
 1. Set your [Google account info](https://github.com/nanonanomachine/save-google-spaces/blob/master/app.rb#L5-L6)(`EMAIL`, `PASSWORD`) in app.rb.
   * You also need to change `BUTTON_NEXT`, `FILL_IN_PASSWORD`, `BUTTON_LOGIN` if your browser language is not English.
-2. Run `app.rb`. Don't forget to pass directory path.
+2. Run `app.rb`. Don't forget to pass directory path. You can also pass a specific space url.
 
 For example:
 
 ```sh
 $ ruby app.rb /tmp/spaces_logs
+```
+
+If you want to save logs in a specific space:
+
+```sh
+$ ruby app.rb /tmp/spaces_logs https://spaces.google.com/space/123456789
 ```

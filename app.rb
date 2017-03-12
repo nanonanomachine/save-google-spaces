@@ -11,7 +11,42 @@ BUTTON_NEXT = 'Next'
 FILL_IN_PASSWORD = 'Password'
 BUTTON_LOGIN = 'Login'
 
+def save_space(session, space_url, directory_name)
+  session.visit space_url
+
+  topic_urls = Array.new
+  session.all('c-wiz .c1tmJe').each do |topic|
+    iid = topic['data-iid']
+    topic_urls << space_url + "/post/#{iid}"
+  end
+
+  topic_urls.each_with_index do |topic_url, index|
+    session.visit topic_url
+
+    # Force append old comments
+    30.times.each do
+      session.execute_script "var divs = document.getElementsByClassName('S0zjke eejsDc');divs[divs.length -1].scrollTop = 0;"
+      # Changing window size enables trigger xhr
+      session.driver.browser.manage.window.resize_to(800, 100)
+      session.driver.browser.manage.window.maximize
+    end
+
+    File.open(File.join(directory_name, "#{index}.text"), 'a') do |f|
+      session.all('div.iTFkL').each do |comment|
+        if comment.has_css?('a')
+          comment.all('a').each do |link|
+            f.puts link[:href]
+          end
+        elsif comment.has_css?('.li9sW')
+          f.puts comment.find('.li9sW').text
+        end
+      end
+    end
+  end
+end
+
 directory_name = ARGV[0]
+url = ARGV[1] # optional
 
 Capybara.register_driver :selenium do |app|
   Capybara::Selenium::Driver.new(app, browser: :chrome )
@@ -40,36 +75,10 @@ session.all('.kX5sNb').each do |space|
   space_urls << space[:href]
 end
 
-space_urls.each_with_index do |space_url, i|
-  session.visit space_url
+p space_urls
 
-  topic_urls = Array.new
-  session.all('c-wiz .c1tmJe').each do |topic|
-    iid = topic['data-iid']
-    topic_urls << space_url + "/post/#{iid}"
-  end
-
-  topic_urls.each_with_index do |topic_url, j|
-    session.visit topic_url
-
-    # Force append old comments
-    30.times.each do
-      session.execute_script "var divs = document.getElementsByClassName('S0zjke eejsDc');divs[divs.length -1].scrollTop = 0;"
-      # Changing window size enables trigger xhr
-      session.driver.browser.manage.window.resize_to(800, 100)
-      session.driver.browser.manage.window.maximize
-    end
-
-    File.open(File.join(space_directory_names[i], "#{j}.text"), 'a') do |f|
-      session.all('div.iTFkL').each do |comment|
-        if comment.has_css?('a')
-          comment.all('a').each do |link|
-            f.puts link[:href]
-          end
-        elsif comment.has_css?('.li9sW')
-          f.puts comment.find('.li9sW').text
-        end
-      end
-    end
-  end
+if url
+  save_space(session, url, space_directory_names[space_urls.index(url)])
+else
+  space_urls.each_with_index { |space_url, index| save_space(session, space_url, space_directory_names[index]) }
 end
