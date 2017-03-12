@@ -8,6 +8,7 @@ Spaces will be discontinued on [April 17th](https://support.google.com/spaces/?p
 Capybara and selenium-webdriver(chromedriver) are used to achieve that.
 
 This script will create directories of each space. Then logs named with numeric number are created in these directories.
+Currently it only saves texts and messages. Saving images is not supported.
 
 Installation
 ------------
